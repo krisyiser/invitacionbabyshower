@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jorge Jr - Invitación Dinámica</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<style>
+:root{
+  --naval: #2f3d4c; --windy: #aabac6; --upward: #BFC9D0;
+  --sand: #D7C3AD; --alabaster: #EDEAE0; --white: #ffffff;
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+body{
+  margin:0; font-family:'Quicksand',sans-serif; color:var(--naval);
+  background: var(--alabaster); overflow-x:hidden;
+}
+
+/* ===============================
+   OSO CON GLOBOS (DINÁMICO)
+=============================== */
+#floatingBearContainer {
+    position: fixed;
+    top: 15%;
+    right: 5%;
+    width: 140px;
+    z-index: 1000;
+    pointer-events: auto;
+    cursor: grab;
+    transition: transform 0.1s ease-out;
+}
+.bear-globes { width: 100%; filter: drop-shadow(5px 10px 15px rgba(0,0,0,0.1)); }
+
+/* ===============================
+   ESTRELLAS Y BRILLOS
+=============================== */
+.star-field { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+.sparkle {
+  position: absolute; width: 4px; height: 4px;
+  background: white; border-radius: 50%;
+  animation: twinkle 3s infinite ease-in-out;
+}
+@keyframes twinkle { 0%, 100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.5); } }
+
+/* ===============================
+   SECCIONES Y TARJETAS
+=============================== */
+section { 
+    min-height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    position: relative;
+    padding: 40px 20px;
+}
+
+.hero-section { background: linear-gradient(to bottom, var(--white), var(--alabaster)); }
+
+.info-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 50px;
+    padding: 50px 30px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 20px 20px 60px #d9d6ce, -20px -20px 60px #ffffff;
+    z-index: 10;
+}
+
+/* Osito en la luna - Decoración de fondo */
+.moon-bear-bg {
+    position: absolute;
+    bottom: -10%;
+    left: -20px;
+    width: 220px;
+    opacity: 0.4;
+    z-index: 1;
+    transform: rotate(10deg);
+}
+
+/* ===============================
+   INTERACCIÓN DE BOTONES
+=============================== */
+.btn-premium {
+    display: block;
+    width: 100%;
+    padding: 20px;
+    margin-top: 15px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+.btn-premium:hover { transform: translateY(-5px) scale(1.02); }
+.btn-ubi { background: var(--upward); color: var(--naval); }
+.btn-gift { background: var(--sand); color: var(--naval); }
+.btn-wa { background: var(--naval); color: white; }
+
+</style>
+</head>
+<body>
+
+<div class="star-field" id="starField"></div>
+
+<div id="floatingBearContainer">
+    <img src="https://media-public.canva.com/P9H3g/MAFvvoP9H3g/1/tl.png" class="bear-globes" alt="Oso Volador">
+</div>
+
+<div id="splash" style="position:fixed; inset:0; background:var(--white); z-index:10000; display:flex; justify-content:center; align-items:center; transition:1s;">
+    <h2 style="font-family:'Dancing Script'; color:var(--windy); font-size: 2rem;">Un regalo del cielo...</h2>
+</div>
+
+<section class="hero-section">
+    <img src="https://media-public.canva.com/wEWo8/MAFvvtwEWo8/1/tl.png" style="width: 300px; margin-bottom: 20px;" data-aos="fade-down">
+    <p style="letter-spacing: 6px; font-weight: 600; font-size: 0.7rem; color: var(--windy);">¡ESTÁ EN CAMINO!</p>
+    <h1 id="name-anim" style="font-family:'Dancing Script'; font-size: 5rem; color: var(--naval); margin: 0;"></h1>
+</section>
+
+<section style="background: var(--white); border-radius: 80px 80px 0 0;">
+    <img src="https://media-public.canva.com/Bta-E/MAFvvpBta-E/1/tl.png" class="moon-bear-bg" data-aos="zoom-in">
+    
+    <div class="info-card" data-aos="fade-up">
+        <h2 style="font-family:'Dancing Script'; font-size: 3.5rem; margin: 0; color: var(--windy);">Baby Shower</h2>
+        
+        <div style="margin: 30px 0; border-top: 1.5px solid var(--upward); border-bottom: 1.5px solid var(--upward); padding: 20px;">
+            <p style="margin: 0; letter-spacing: 2px;">DOMINGO</p>
+            <p style="font-size: 4rem; font-weight: 300; margin: 5px 0; line-height: 1;">15</p>
+            <p style="margin: 0;">MARZO | 4:00 PM | 2026</p>
+        </div>
+
+        <p style="font-size: 1.1rem;">
+            <b>Salón Luuma</b><br>
+            <span style="opacity: 0.7; font-size: 0.9rem;">Juan Enríquez #605, Col. Xanath<br>Papantla, Veracruz.</span>
+        </p>
+    </div>
+</section>
+
+<section style="background: var(--upward);">
+    <div class="info-card" data-aos="zoom-in">
+        <div id="timer" style="display:flex; justify-content:space-around; margin-bottom: 30px;">
+            <div><b id="d" style="font-size: 2rem;">00</b><br><small>DÍAS</small></div>
+            <div><b id="h" style="font-size: 2rem;">00</b><br><small>HRS</small></div>
+            <div><b id="m" style="font-size: 2rem;">00</b><br><small>MIN</small></div>
+        </div>
+
+        <a class="btn-premium btn-ubi" href="https://maps.app.goo.gl/gFZCHqNcPCpFmwU89">📍 CÓMO LLEGAR</a>
+        <a class="btn-premium btn-gift" href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51932538">🛍️ MESA DE REGALOS</a>
+        <a class="btn-premium btn-wa" href="https://wa.me/qr/K74CJTNDMM3PH1">💬 CONFIRMAR WHATSAPP</a>
+    </div>
+
+    <img src="https://media-public.canva.com/FQRt4/MAFvvkFQRt4/1/tl.png" style="width: 260px; margin-top: 50px;" data-aos="fade-up">
+</section>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init({ duration: 1000, once: false });
+
+    // Generar estrellas
+    const field = document.getElementById('starField');
+    for(let i=0; i<30; i++) {
+        const star = document.createElement('div');
+        star.className = 'sparkle';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        field.appendChild(star);
+    }
+
+    // INTERACCIÓN OSO CON GLOBOS
+    const bearContainer = document.getElementById('floatingBearContainer');
+    let mouseX = 0, mouseY = 0;
+    let bearX = 0, bearY = 0;
+
+    // Movimiento de flotación constante (Natural)
+    gsap.to(bearContainer, {
+        y: "+=25",
+        x: "+=15",
+        rotation: 5,
+        duration: 3,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+    });
+
+    // Reacción al Scroll (Parallax)
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        gsap.to(bearContainer, {
+            y: scrolled * -0.15, // Se eleva mientras bajas
+            duration: 0.5
+        });
+    });
+
+    // Reacción al toque/mouse (Se asusta o se mueve)
+    bearContainer.addEventListener('mouseenter', () => {
+        gsap.to(bearContainer, { scale: 1.2, rotation: -10, duration: 0.3 });
+    });
+    bearContainer.addEventListener('mouseleave', () => {
+        gsap.to(bearContainer, { scale: 1, rotation: 0, duration: 0.5 });
+    });
+
+    // Splash y Typewriter
+    window.onload = () => {
+        setTimeout(() => {
+            document.getElementById('splash').style.opacity = "0";
+            setTimeout(() => document.getElementById('splash').remove(), 1000);
+            
+            const text = "Jorge Jr";
+            const target = document.getElementById('name-anim');
+            text.split('').forEach((char, i) => {
+                const span = document.createElement('span');
+                span.textContent = char === ' ' ? '\u00A0' : char;
+                span.style.display = 'inline-block';
+                target.appendChild(span);
+                gsap.from(span, { opacity: 0, y: 40, delay: i * 0.1, duration: 0.7, ease: "back.out(2)" });
+            });
+        }, 1800);
+    };
+
+    // Countdown
+    const target = new Date('March 15, 2026 16:00:00').getTime();
+    setInterval(() => {
+        const diff = target - new Date().getTime();
+        document.getElementById('d').innerText = Math.floor(diff / 86400000);
+        document.getElementById('h').innerText = Math.floor((diff % 86400000) / 3600000);
+        document.getElementById('m').innerText = Math.floor((diff % 3600000) / 60000);
+    }, 1000);
+</script>
+
+</body>
+</html>
