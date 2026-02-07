@@ -22,7 +22,84 @@ body{
 }
 
 /* ===============================
-   OSO CON GLOBOS (DINÁMICO)
+   AVISO "DESLIZA HACIA ABAJO"
+=============================== */
+#scrollHint{
+  position: fixed;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 999px;
+
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+
+  opacity: 0;
+  pointer-events: none;
+}
+
+#scrollHint .text{
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--naval);
+  white-space: nowrap;
+}
+
+#scrollHint .arrow{
+  width: 12px; height: 18px;
+  position: relative;
+  opacity: 0.9;
+}
+#scrollHint .arrow::before{
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--naval);
+  transform: translateX(-50%);
+  border-radius: 2px;
+}
+#scrollHint .arrow::after{
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--naval);
+  border-bottom: 2px solid var(--naval);
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 1px;
+}
+#scrollHint.pulse{
+  animation: hintPulse 1.4s ease-in-out infinite;
+}
+@keyframes hintPulse{
+  0%,100%{ transform: translateY(-50%) translateX(0); }
+  50%{ transform: translateY(-50%) translateX(4px); }
+}
+
+@media (max-width: 520px){
+  #scrollHint{
+    left: 10px;
+    padding: 9px 10px;
+  }
+  #scrollHint .text{ font-size: 0.7rem; letter-spacing: 1.6px; }
+}
+
+/* ===============================
+   OSO CON GLOBOS (DRAGGABLE)
 =============================== */
 #floatingBearContainer {
     position: fixed;
@@ -32,9 +109,15 @@ body{
     z-index: 1000;
     pointer-events: auto;
     cursor: grab;
-    transition: transform 0.1s ease-out;
+    user-select: none;
+    touch-action: none; /* clave para drag en móvil */
 }
-.bear-globes { width: 100%; filter: drop-shadow(5px 10px 15px rgba(0,0,0,0.1)); }
+#floatingBearContainer:active{ cursor: grabbing; }
+
+.bear-globes {
+  width: 100%;
+  filter: drop-shadow(5px 10px 15px rgba(0,0,0,0.1));
+}
 
 /* ===============================
    ESTRELLAS Y BRILLOS
@@ -112,8 +195,15 @@ section {
 
 <div class="star-field" id="starField"></div>
 
+<!-- AVISO LATERAL -->
+<div id="scrollHint" aria-hidden="true">
+  <span class="arrow"></span>
+  <span class="text">desliza hacia abajo</span>
+</div>
+
+<!-- OSITO DRAGGABLE -->
 <div id="floatingBearContainer">
-    <img src="https://media-public.canva.com/P9H3g/MAFvvoP9H3g/1/tl.png" class="bear-globes" alt="Oso Volador">
+    <img src="https://media-public.canva.com/P9H3g/MAFvvoP9H3g/1/tl.png" class="bear-globes" alt="Oso Volador" draggable="false">
 </div>
 
 <div id="splash" style="position:fixed; inset:0; background:var(--white); z-index:10000; display:flex; justify-content:center; align-items:center; transition:1s;">
@@ -163,78 +253,218 @@ section {
 
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-    AOS.init({ duration: 1000, once: false });
+  AOS.init({ duration: 1000, once: false });
 
-    // Generar estrellas
-    const field = document.getElementById('starField');
-    for(let i=0; i<30; i++) {
-        const star = document.createElement('div');
-        star.className = 'sparkle';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.animationDelay = Math.random() * 3 + 's';
-        field.appendChild(star);
+  // Generar estrellas
+  const field = document.getElementById('starField');
+  for(let i=0; i<30; i++) {
+    const star = document.createElement('div');
+    star.className = 'sparkle';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.animationDelay = Math.random() * 3 + 's';
+    field.appendChild(star);
+  }
+
+  // ===============================
+  // HINT "DESLIZA HACIA ABAJO"
+  // ===============================
+  const hint = document.getElementById('scrollHint');
+  let hintHidden = false;
+
+  function showHint(){
+    if(hintHidden) return;
+    gsap.to(hint, { opacity: 1, duration: 0.6, ease: "power2.out" });
+    hint.classList.add('pulse');
+    // auto-hide suave
+    gsap.to(hint, { opacity: 0, duration: 0.8, delay: 5.5, ease: "power2.inOut",
+      onComplete: ()=>{ hintHidden = true; hint.classList.remove('pulse'); }
+    });
+  }
+
+  function hideHintNow(){
+    if(hintHidden) return;
+    hintHidden = true;
+    hint.classList.remove('pulse');
+    gsap.to(hint, { opacity: 0, duration: 0.35, ease: "power2.out" });
+  }
+
+  window.addEventListener('scroll', () => {
+    if(window.scrollY > 12) hideHintNow();
+  }, { passive:true });
+
+  // ===============================
+  // OSO: FLOTACIÓN + DRAG SUAVE
+  // ===============================
+  const bearContainer = document.getElementById('floatingBearContainer');
+
+  // Estado drag
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let startLeft = 0, startTop = 0;
+  let currentLeft = null, currentTop = null;
+
+  // Flotación (se aplica como transform; no toca top/left)
+  const floatTl = gsap.to(bearContainer, {
+    x: "+=14",
+    y: "+=22",
+    rotation: 3,
+    duration: 3.2,
+    repeat: -1,
+    yoyo: true,
+    ease: "sine.inOut"
+  });
+
+  // Hover (solo desktop)
+  bearContainer.addEventListener('mouseenter', () => {
+    if(isDragging) return;
+    gsap.to(bearContainer, { scale: 1.08, rotation: -4, duration: 0.25, overwrite: "auto" });
+  });
+  bearContainer.addEventListener('mouseleave', () => {
+    if(isDragging) return;
+    gsap.to(bearContainer, { scale: 1, rotation: 0, duration: 0.35, overwrite: "auto" });
+  });
+
+  // Helper: obtener top/left actuales en px
+  function getCurrentTopLeft(){
+    const rect = bearContainer.getBoundingClientRect();
+    // convertimos a coordenadas dentro de viewport (fixed)
+    return { left: rect.left, top: rect.top };
+  }
+
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  function pointerDown(e){
+    isDragging = true;
+    hideHintNow();
+
+    bearContainer.setPointerCapture?.(e.pointerId);
+
+    // Congelamos el transform momentáneamente para que no “huya” mientras lo agarran
+    // (seguimos dejando la flotación viva, pero la sensación de control mejora)
+    gsap.to(bearContainer, { scale: 1.06, duration: 0.15, overwrite: "auto" });
+
+    // Establecer top/left explícitos si aún no existen
+    const { left, top } = getCurrentTopLeft();
+    const cs = window.getComputedStyle(bearContainer);
+
+    // Si estaba usando right/top, convertimos a left/top para drag estable
+    if(cs.right !== 'auto' || cs.left === 'auto'){
+      bearContainer.style.left = left + "px";
+      bearContainer.style.top  = top + "px";
+      bearContainer.style.right = "auto";
     }
 
-    // INTERACCIÓN OSO CON GLOBOS
-    const bearContainer = document.getElementById('floatingBearContainer');
-    let mouseX = 0, mouseY = 0;
-    let bearX = 0, bearY = 0;
+    currentLeft = parseFloat(bearContainer.style.left);
+    currentTop  = parseFloat(bearContainer.style.top);
 
-    // Movimiento de flotación constante (Natural)
+    startX = e.clientX;
+    startY = e.clientY;
+    startLeft = currentLeft;
+    startTop  = currentTop;
+  }
+
+  function pointerMove(e){
+    if(!isDragging) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    const w = bearContainer.offsetWidth;
+    const h = bearContainer.offsetHeight;
+
+    const maxLeft = window.innerWidth - w - 8;
+    const maxTop  = window.innerHeight - h - 8;
+
+    const newLeft = clamp(startLeft + dx, 8, maxLeft);
+    const newTop  = clamp(startTop + dy, 8, maxTop);
+
+    // Movemos por left/top para que el punto quede guardado; transform queda para la flotación
+    bearContainer.style.left = newLeft + "px";
+    bearContainer.style.top  = newTop + "px";
+  }
+
+  function pointerUp(e){
+    if(!isDragging) return;
+    isDragging = false;
+
+    // “Soltar” con suavidad (queda flotando donde lo dejen)
+    gsap.to(bearContainer, { scale: 1, duration: 0.25, overwrite: "auto" });
+
+    // micro-asentamiento
+    gsap.fromTo(bearContainer,
+      { y: gsap.getProperty(bearContainer, "y") },
+      { y: "+=6", duration: 0.35, yoyo: true, repeat: 1, ease: "sine.inOut", overwrite: false }
+    );
+  }
+
+  bearContainer.addEventListener('pointerdown', pointerDown);
+  window.addEventListener('pointermove', pointerMove, { passive:true });
+  window.addEventListener('pointerup', pointerUp);
+
+  // Reaccion al scroll: mantenemos un toque sutil, sin pelear con drag.
+  // (solo un micro ajuste de rotación/escala, no y, porque ya existe flotación)
+  window.addEventListener('scroll', () => {
+    if(isDragging) return;
     gsap.to(bearContainer, {
-        y: "+=25",
-        x: "+=15",
-        rotation: 5,
-        duration: 3,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
+      rotation: 3 + (window.scrollY * 0.0008),
+      duration: 0.35,
+      overwrite: "auto"
     });
+  }, { passive:true });
 
-    // Reacción al Scroll (Parallax)
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        gsap.to(bearContainer, {
-            y: scrolled * -0.15, // Se eleva mientras bajas
-            duration: 0.5
-        });
-    });
+  // ===============================
+  // Splash + animación nombre + mostrar hint
+  // ===============================
+  window.onload = () => {
+    setTimeout(() => {
+      const splash = document.getElementById('splash');
+      splash.style.opacity = "0";
+      setTimeout(() => splash.remove(), 1000);
 
-    // Reacción al toque/mouse (Se asusta o se mueve)
-    bearContainer.addEventListener('mouseenter', () => {
-        gsap.to(bearContainer, { scale: 1.2, rotation: -10, duration: 0.3 });
-    });
-    bearContainer.addEventListener('mouseleave', () => {
-        gsap.to(bearContainer, { scale: 1, rotation: 0, duration: 0.5 });
-    });
+      // Nombre animado
+      const text = "Jorge Jr";
+      const target = document.getElementById('name-anim');
+      target.innerHTML = "";
+      text.split('').forEach((char, i) => {
+        const span = document.createElement('span');
+        span.textContent = char === ' ' ? '\u00A0' : char;
+        span.style.display = 'inline-block';
+        target.appendChild(span);
+        gsap.from(span, { opacity: 0, y: 40, delay: i * 0.1, duration: 0.7, ease: "back.out(2)" });
+      });
 
-    // Splash y Typewriter
-    window.onload = () => {
-        setTimeout(() => {
-            document.getElementById('splash').style.opacity = "0";
-            setTimeout(() => document.getElementById('splash').remove(), 1000);
-            
-            const text = "Jorge Jr";
-            const target = document.getElementById('name-anim');
-            text.split('').forEach((char, i) => {
-                const span = document.createElement('span');
-                span.textContent = char === ' ' ? '\u00A0' : char;
-                span.style.display = 'inline-block';
-                target.appendChild(span);
-                gsap.from(span, { opacity: 0, y: 40, delay: i * 0.1, duration: 0.7, ease: "back.out(2)" });
-            });
-        }, 1800);
-    };
+      // Mostrar hint después del splash
+      setTimeout(showHint, 450);
 
-    // Countdown
-    const target = new Date('March 15, 2026 16:00:00').getTime();
-    setInterval(() => {
-        const diff = target - new Date().getTime();
-        document.getElementById('d').innerText = Math.floor(diff / 86400000);
-        document.getElementById('h').innerText = Math.floor((diff % 86400000) / 3600000);
-        document.getElementById('m').innerText = Math.floor((diff % 3600000) / 60000);
-    }, 1000);
+    }, 1800);
+  };
+
+  // Countdown
+  const targetDate = new Date('March 15, 2026 16:00:00').getTime();
+  setInterval(() => {
+    const diff = targetDate - new Date().getTime();
+    document.getElementById('d').innerText = Math.max(0, Math.floor(diff / 86400000));
+    document.getElementById('h').innerText = Math.max(0, Math.floor((diff % 86400000) / 3600000));
+    document.getElementById('m').innerText = Math.max(0, Math.floor((diff % 3600000) / 60000));
+  }, 1000);
+
+  // Ajuste al resize (evita que el oso quede fuera de pantalla tras rotación)
+  window.addEventListener('resize', () => {
+    const cs = window.getComputedStyle(bearContainer);
+    if(cs.left === 'auto') return; // si no está en modo left/top aún, no tocamos
+
+    const w = bearContainer.offsetWidth;
+    const h = bearContainer.offsetHeight;
+    const maxLeft = window.innerWidth - w - 8;
+    const maxTop  = window.innerHeight - h - 8;
+
+    const left = clamp(parseFloat(bearContainer.style.left || "0"), 8, maxLeft);
+    const top  = clamp(parseFloat(bearContainer.style.top || "0"), 8, maxTop);
+
+    bearContainer.style.left = left + "px";
+    bearContainer.style.top  = top + "px";
+  });
 </script>
 
 </body>
